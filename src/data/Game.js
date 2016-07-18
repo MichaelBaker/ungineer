@@ -1,4 +1,4 @@
-import I from 'immutable-js'
+import I from 'immutable'
 
 export let Mode = {
   Experiment: "experiment",

@@ -1,21 +1,16 @@
-import React         from 'react'
-import Redux         from 'redux'
-import { render }    from 'react-dom'
-import App           from './components/App'
-import { emptyGame } from './data/Game'
+import React           from 'react'
+import { render }      from 'react-dom'
+import App             from './components/App'
+import { emptyStore }  from './Store'
 
-const store = Redux.createStore((state = emptyGame, action) => {
-  switch (action.type) {
-    default:
-      return state
-  }
-})
+const store = emptyStore
 
-const renderApp = (game) => {
+const renderApp = (store, game) => {
   render(
-    <App game={game} />,
+    <App store={store} game={game} />,
     document.getElementById('root')
   )
 }
 
-store.subscribe(() => renderApp(store.getState()))
+store.subscribe(() => renderApp(store, store.getState()))
+renderApp(store, store.getState())
