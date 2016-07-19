@@ -2,10 +2,15 @@ import React, {Component} from 'react'
 import Redux              from 'redux'
 import { Mode }           from '../data/Game'
 import { Action }         from '../Store'
+import Lab                from './Lab'
 
 export default class App extends Component {
   toggleMode() {
     this.props.store.dispatch(Action.ToggleMode())
+  }
+
+  getChildContext() {
+    return { store: this.props.store }
   }
 
   renderExperiment(game) {
@@ -15,6 +20,7 @@ export default class App extends Component {
         <div onClick={this.toggleMode.bind(this)}>
           Start Challenge
         </div>
+        <Lab squares={game.get('squares')} />
       </div>
     )
   }
@@ -40,4 +46,8 @@ export default class App extends Component {
       return this.renderChallenge(game)
     }
   }
+}
+
+App.childContextTypes = {
+  store: React.PropTypes.object
 }
