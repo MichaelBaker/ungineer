@@ -20,18 +20,19 @@ export default class App extends Component {
         <div onClick={this.toggleMode.bind(this)}>
           Start Challenge
         </div>
-        <Lab lab={game.get('lab')} />
+        <Lab canActuate={true} lab={game.get('lab')} />
       </div>
     )
   }
 
   renderChallenge(game) {
+    const isVictory = game.get('victory')
     return (
       <div>
-        Challenge
-        <div onClick={this.toggleMode.bind(this)}>
-          Experiment
-        </div>
+        {isVictory ? <div>Victory</div> : <div>Challenge</div>}
+        <div onClick={this.toggleMode.bind(this)}>Experiment</div>
+        <Lab canActuate={!isVictory} lab={game.get('lab')} />
+        <Lab canActuate={false} lab={game.get('challenge')} />
       </div>
     )
   }
@@ -42,7 +43,7 @@ export default class App extends Component {
 
     if (mode === Game.Mode.Experiment) {
       return this.renderExperiment(game)
-    } else if (mode === Mode.Challenge) {
+    } else if (mode === Game.Mode.Challenge) {
       return this.renderChallenge(game)
     }
   }

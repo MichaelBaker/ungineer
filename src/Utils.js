@@ -1,4 +1,8 @@
-import I from 'immutable'
+import I      from 'immutable'
+import Hashes from 'jshashes'
+
+const sha = new Hashes.SHA256
+const hashToInt = (num) => parseInt("0x" + sha.hex(num.toString()), 16)
 
 export let curry = (f) => {
   if (f.length <= 1) {
@@ -27,3 +31,23 @@ const makeCurry = (numArgs, args, f) => {
     }
   }
 }
+
+export let randomSeed = () => {
+  return hashToInt(Math.random())
+}
+
+export let randomInt = curry((lower, upper, seed) => {
+  if (upper < lower) {
+    throw new Error("The upper value of the range must be greater than or equal to the lower value: " + JSON.stringify({lower, upper}))
+  }
+
+  const hashValue = hashToInt(seed)
+  const range     = upper + 1 - lower
+  const value     = lower + (hashValue % range)
+  return { value, newSeed: seed + 1 }
+})
+
+export let randomElement = curry((collection, seed) => {
+  const { value, newSeed } = randomInt(0)(collection.count())(seed)
+  return { value: collection.get(value), newSeed }
+})

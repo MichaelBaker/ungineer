@@ -3,8 +3,10 @@ import { Action }         from '../Store'
 
 export default class Square extends Component {
   select() {
-    const action = Action.SelectSquare({ id: this.props.square.get('id') })
-    this.context.store.dispatch(action)
+    if (this.props.canActuate) {
+      const action = Action.SelectSquare({ id: this.props.square.get('id') })
+      this.context.store.dispatch(action)
+    }
   }
 
   render() {

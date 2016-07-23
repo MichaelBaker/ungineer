@@ -1,3 +1,4 @@
+import I               from 'immutable'
 import { createStore } from 'redux'
 import * as U          from './Utils'
 import * as Game       from './data/Game'
@@ -6,14 +7,23 @@ import * as Square     from './data/Square'
 
 const handleExperimentAction = (action, state) => {
   if (action.type === 'SelectSquare' ) {
-    return U.compose([Game.cycleColor(action.id), Game.react([action.id])])(state)
+    return Game.actuateSquare(action.id)(state)
   } else {
     return state
   }
 }
 
 const handleChallengeAction = (action, state) => {
-  return state
+  if (action.type === 'SelectSquare' ) {
+    const newGame = Game.actuateSquare(action.id)(state)
+    if (I.is(newGame.get('lab'), newGame.get('challenge'))) {
+      return newGame.set('victory', true)
+    } else {
+      return newGame
+    }
+  } else {
+    return state
+  }
 }
 
 export const Action = {
@@ -62,12 +72,15 @@ const world = World.createWorld({
 export const emptyStore = createStore((state = Game.experiment({ world }), action) => {
   if (action.type === 'ToggleMode' ) {
     if (Game.gameMode(state) === Game.Mode.Experiment) {
-      return state.set('mode', Game.Mode.Challenge)
-    } else {
-      return state.set('mode', Game.Mode.Experiment)
+      const world = state.get('cleanWorld')
+      const seed  = U.randomSeed()
+      return Game.challenge({ world, seed })
+    } else if (Game.gameMode(state) === Game.Mode.Challenge) {
+      const world = state.get('cleanWorld')
+      return Game.experiment({ world })
     }
   } else if (Game.gameMode(state) === Game.Mode.Challenge) {
-    return handleChallengAction(action, state)
+    return handleChallengeAction(action, state)
   } else if (Game.gameMode(state) === Game.Mode.Experiment) {
     return handleExperimentAction(action, state)
   } else {

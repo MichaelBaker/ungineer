@@ -27,6 +27,8 @@
   "dependencies": {
     "babel-runtime": "^6.3.19",
     "immutable": "^3.8.1",
+    "jshashes": "^1.0.5",
+    "lodash": "^4.13.1",
     "react": "^0.14.5",
     "react-dom": "^0.14.5",
     "redux": "^3.5.2"
