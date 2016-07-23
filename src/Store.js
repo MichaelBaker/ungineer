@@ -1,23 +1,21 @@
-import { createStore }     from 'redux'
-import { emptyGame, Mode } from './data/Game'
+import { createStore } from 'redux'
+import * as Game       from './data/Game'
+import * as U          from './Utils'
 
 export const Action = {
   ToggleMode: () => { return { type: 'ToggleMode' } },
   SelectSquare: ({ id }) => { return { type: 'SelectSquare', id } },
 }
 
-export const emptyStore = createStore((state = emptyGame, action) => {
+export const emptyStore = createStore((state = Game.emptyGame, action) => {
   if (action.type === 'ToggleMode' ) {
-    if (state.get('mode') === Mode.Experiment) {
-      return state.set('mode', Mode.Challenge)
+    if (state.get('mode') === Game.Mode.Experiment) {
+      return state.set('mode', Game.Mode.Challenge)
     } else {
-      return state.set('mode', Mode.Experiment)
+      return state.set('mode', Game.Mode.Experiment)
     }
   } else if (action.type === 'SelectSquare' ) {
-    return state.updateIn(['squares', action.id, 'colors'], (colors) => {
-      const color = colors.first()
-      return colors.shift().push(color)
-    })
+    return U.compose([Game.cycleColor(action.id), Game.react([action.id])])(state)
   } else {
     return state
   }
