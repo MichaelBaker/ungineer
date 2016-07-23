@@ -4,7 +4,7 @@ import Square             from './Square'
 
 export default class Lab extends Component {
   render() {
-    const squares = this.props.squares.toArray()
+    const squares = this.props.lab.get('squares').toArray()
     return (
       <div>
         {squares.map((square) => {

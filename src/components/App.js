@@ -20,7 +20,7 @@ export default class App extends Component {
         <div onClick={this.toggleMode.bind(this)}>
           Start Challenge
         </div>
-        <Lab squares={game.get('squares')} />
+        <Lab lab={game.get('lab')} />
       </div>
     )
   }

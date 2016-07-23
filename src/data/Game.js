@@ -1,14 +1,14 @@
 import I           from 'immutable'
-import * as Square from './Square.js'
+import * as Square from './Square'
 import * as U      from '../Utils'
+import * as World  from './World'
 
 export let Mode = {
   Experiment: "experiment",
   Challenge:  "challenge",
 }
 
-export let emptyGame = I.fromJS({
-  mode: Mode.Experiment,
+const cleanWorld = World.createWorld({
   squares: {
     0: Square.createSquare({ id: '0', colors: ['red', 'blue', 'green', 'yellow'], reaction: (squares) => {
       const other = squares.get('1')
@@ -42,23 +42,29 @@ export let emptyGame = I.fromJS({
         return 'blue'
       }
     } }),
-  },
+  }
+})
+
+export let emptyGame = I.fromJS({
+  mode:       Mode.Experiment,
+  cleanWorld: cleanWorld,
+  lab:        cleanWorld,
 })
 
 export let cycleColor = U.curry((squareId, game) => {
-  return game.updateIn(['squares', squareId], (square) => {
+  return game.updateIn(['lab', 'squares', squareId], (square) => {
     return Square.cycleColor(square)
   })
 })
 
 export let react = U.curry((exceptSquareIds, originalGame) => {
   const imutIds = I.fromJS(exceptSquareIds)
-  const squares = originalGame.get('squares')
+  const squares = originalGame.getIn(['lab', 'squares'])
   return squares.keySeq().reduce((newGame, squareId) => {
     if (imutIds.includes(squareId)) {
       return newGame
     } else {
-      return newGame.updateIn(['squares', squareId], (square) => {
+      return newGame.updateIn(['lab', 'squares', squareId], (square) => {
         const newColor = square.get('reaction')(squares)
         if (newColor) {
           return Square.cycleToColor(newColor)(square)
