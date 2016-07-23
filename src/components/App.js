@@ -4,6 +4,13 @@ import { Action }         from '../Store'
 import Lab                from './Lab'
 import * as Game          from '../data/Game'
 
+const appStyle = {
+  display:       'flex',
+  flexDirection: 'column',
+  margin:        'auto',
+  alignItems:    'center',
+}
+
 export default class App extends Component {
   toggleMode() {
     this.props.store.dispatch(Action.ToggleMode())
@@ -13,13 +20,19 @@ export default class App extends Component {
     return { store: this.props.store }
   }
 
-  renderExperiment(game) {
+  renderHeader(mode, toggle) {
     return (
       <div>
-        Experiment
-        <div onClick={this.toggleMode.bind(this)}>
-          Start Challenge
-        </div>
+        <div>Mode: {mode}</div>
+        <div onClick={this.toggleMode.bind(this)}>{toggle}</div>
+      </div>
+    )
+  }
+
+  renderExperiment(game) {
+    return (
+      <div style={appStyle}>
+        {this.renderHeader('Experiment', 'Start Challenge')}
         <Lab canActuate={true} lab={game.get('lab')} />
       </div>
     )
@@ -27,12 +40,15 @@ export default class App extends Component {
 
   renderChallenge(game) {
     const isVictory = game.get('victory')
+    const modeText  = isVictory ? 'Victory' : 'Challenge'
     return (
-      <div>
-        {isVictory ? <div>Victory</div> : <div>Challenge</div>}
-        <div onClick={this.toggleMode.bind(this)}>Experiment</div>
-        <Lab canActuate={!isVictory} lab={game.get('lab')} />
-        <Lab canActuate={false} lab={game.get('challenge')} />
+      <div style={appStyle}>
+        {this.renderHeader(modeText, 'Experiment')}
+        <div>Make the left side match the right side</div>
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <Lab canActuate={!isVictory} lab={game.get('lab')} />
+          <Lab canActuate={false} lab={game.get('challenge')} />
+        </div>
       </div>
     )
   }

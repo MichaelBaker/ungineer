@@ -13,10 +13,12 @@ const handleExperimentAction = (action, state) => {
   }
 }
 
+const isVictory = (game) => I.is(game.get('lab'), game.get('challenge'))
+
 const handleChallengeAction = (action, state) => {
   if (action.type === 'SelectSquare' ) {
     const newGame = Game.actuateSquare(action.id)(state)
-    if (I.is(newGame.get('lab'), newGame.get('challenge'))) {
+    if (isVictory(newGame)) {
       return newGame.set('victory', true)
     } else {
       return newGame
@@ -68,13 +70,21 @@ const world = World.createWorld({
   }
 })
 
+const createChallenge = (world) => {
+  const seed = U.randomSeed()
+  const game = Game.challenge({ world, seed })
+
+  if (isVictory(game)) {
+    return createChallenge(world)
+  } else {
+    return game
+  }
+}
 
 export const emptyStore = createStore((state = Game.experiment({ world }), action) => {
   if (action.type === 'ToggleMode' ) {
     if (Game.gameMode(state) === Game.Mode.Experiment) {
-      const world = state.get('cleanWorld')
-      const seed  = U.randomSeed()
-      return Game.challenge({ world, seed })
+      return createChallenge(state.get('cleanWorld'))
     } else if (Game.gameMode(state) === Game.Mode.Challenge) {
       const world = state.get('cleanWorld')
       return Game.experiment({ world })

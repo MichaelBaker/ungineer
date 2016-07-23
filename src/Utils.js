@@ -48,6 +48,6 @@ export let randomInt = curry((lower, upper, seed) => {
 })
 
 export let randomElement = curry((collection, seed) => {
-  const { value, newSeed } = randomInt(0)(collection.count())(seed)
+  const { value, newSeed } = randomInt(0)(collection.count() - 1)(seed)
   return { value: collection.get(value), newSeed }
 })
