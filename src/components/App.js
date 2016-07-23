@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
 import Redux              from 'redux'
-import { Mode }           from '../data/Game'
 import { Action }         from '../Store'
 import Lab                from './Lab'
+import * as Game          from '../data/Game'
 
 export default class App extends Component {
   toggleMode() {
@@ -38,9 +38,9 @@ export default class App extends Component {
 
   render() {
     const game = this.props.game
-    const mode = game.get('mode')
+    const mode = Game.gameMode(game)
 
-    if (mode === Mode.Experiment) {
+    if (mode === Game.Mode.Experiment) {
       return this.renderExperiment(game)
     } else if (mode === Mode.Challenge) {
       return this.renderChallenge(game)
