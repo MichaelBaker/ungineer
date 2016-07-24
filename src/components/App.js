@@ -1,8 +1,9 @@
 import React, {Component} from 'react'
 import Redux              from 'redux'
 import { Action }         from '../Store'
-import Lab                from './Lab'
+import Level              from './Level'
 import * as Game          from '../data/Game'
+import * as LevelD        from '../data/Level'
 
 const SquareSize    = 100
 const SquareSpacing = 20
@@ -57,24 +58,12 @@ const guidanceText = {
 }
 
 export default class App extends Component {
-  toggleMode() {
-    this.props.store.dispatch(Action.ToggleMode())
-  }
-
-  undo() {
-    this.props.store.dispatch(Action.Undo())
-  }
-
   getChildContext() {
     return { store: this.props.store }
   }
 
-  renderUndo(game) {
-    if (game.get('history').count() > 0) {
-      return <button style={button}  onClick={this.undo.bind(this)}>Undo</button>
-    } else {
-      return <button style={{ ...button, color: '#ccc' }}>Undo</button>
-    }
+  progress() {
+    this.props.store.dispatch(Action.Progress())
   }
 
   renderExperiment(game) {
@@ -113,15 +102,27 @@ export default class App extends Component {
     )
   }
 
-  render() {
-    const game = this.props.game
-    const mode = Game.gameMode(game)
-
-    if (mode === Game.Mode.Experiment) {
-      return this.renderExperiment(game)
-    } else if (mode === Game.Mode.Challenge) {
-      return this.renderChallenge(game)
+  renderNext(isVictory, nextLevel) {
+    if (isVictory && nextLevel) {
+      return <div onClick={this.progress.bind(this)}>Continue to the next level: {nextLevel.get('title')}</div>
+    } else {
+      return <div></div>
     }
+  }
+
+  render() {
+    const state          = this.props.state
+    const level          = state.get('level')
+    const nextLevelIndex = state.get('levelIndex') + 1
+    const nextLevel      = state.getIn(['progression', nextLevelIndex, 'level'])
+
+    return (
+      <div>
+        <div style={titleStyle}>Ungineer</div>
+        {this.renderNext(LevelD.isVictory(level), nextLevel)}
+        <Level level={level} />
+      </div>
+    )
   }
 }
 

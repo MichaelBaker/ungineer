@@ -5,9 +5,9 @@ import { emptyStore }  from './Store'
 
 const store = emptyStore
 
-const renderApp = (store, game) => {
+const renderApp = (store, state) => {
   render(
-    <App store={store} game={game} />,
+    <App store={store} state={state} />,
     document.getElementById('root')
   )
 }

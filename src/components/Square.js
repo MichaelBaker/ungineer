@@ -4,7 +4,7 @@ import { Action }         from '../Store'
 export default class Square extends Component {
   select() {
     if (this.props.canActuate) {
-      const action = Action.SelectSquare({ id: this.props.square.get('id') })
+      const action = Action.SelectSquare({ squareId: this.props.square.get('id') })
       this.context.store.dispatch(action)
     }
   }
