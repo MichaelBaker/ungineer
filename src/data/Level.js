@@ -1,6 +1,6 @@
 import I from 'immutable'
 
-export let createLevel = ({game, startText, endText, isVictory, title, canToggle}) => {
+export let createLevel = ({game, startText, endText, isVictory, title, canToggle, generateChallenges}) => {
   return I.fromJS({
     game,
     title,
@@ -8,6 +8,7 @@ export let createLevel = ({game, startText, endText, isVictory, title, canToggle
     endText,
     isVictory,
     canToggle,
+    generateChallenges,
   })
 }
 

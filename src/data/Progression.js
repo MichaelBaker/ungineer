@@ -56,7 +56,11 @@ export let regress = (progression) => {
 }
 
 export let toggleMode = (progression) => {
+  const level      = progression.get('level')
+  const game       = level.get('game')
+  const challenges = I.fromJS(level.get('generateChallenges')(game))
+
   return progression.updateIn(['level', 'game'], (game) => {
-    return Game.toggleMode(game)
+    return Game.toggleMode(game.set('challenges', challenges))
   })
 }

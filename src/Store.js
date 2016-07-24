@@ -7,12 +7,14 @@ import * as Square     from './data/Square'
 import * as Prog       from './data/Progression'
 import Tutorial00      from './levels/tutorial_00'
 import Tutorial01      from './levels/tutorial_01'
+import FinalLevel      from './levels/final_level'
 
 
 const startState = Prog.createProgression({
   progression: [
     // { level: Tutorial00 },
-    { level: Tutorial01 },
+    // { level: Tutorial01 },
+    { level: FinalLevel },
   ],
 })
 

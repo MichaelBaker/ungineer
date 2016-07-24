@@ -47,64 +47,27 @@ export let actuateSquare = (squareId) => {
   return U.compose([saveHistory, cycleColor(squareId), react([squareId])])
 }
 
-export let randomChallenge = ({world, seed}) => {
-  const startingSeed      = seed
-  const primingIterations = U.randomInt(100)(1000)(startingSeed).value
-  const clicks            = U.randomInt(10)(20)(startingSeed).value
-  const squareIds         = world.get('squares').keySeq()
-
-  let primedWorld = world
-
-  _.times(primingIterations, () => {
-    const { value, newSeed } = U.randomElement(squareIds)(seed)
-    seed        = newSeed
-    primedWorld = World.actuateSquare(value)(primedWorld)
-  })
-
-  let clickedWorld = primedWorld
-
-  _.times(clicks, () => {
-    const { value, newSeed } = U.randomElement(squareIds)(seed)
-    seed         = newSeed
-    clickedWorld = World.actuateSquare(value)(clickedWorld)
-  })
-
-  return I.fromJS({
-    seed,
-    clicks,
-    startingSeed,
-    primingIterations,
-    victory:    false,
-    mode:       Mode.Challenge,
-    cleanWorld: world,
-    lab:        primedWorld,
-    challenge:  clickedWorld,
-    history:    I.fromJS([]),
-    maxHistory: 1000,
-  })
-}
-
-export let challenge = ({world, challenges}) => {
+export let challenge = ({world}) => {
   return I.fromJS({
     mode:                Mode.Challenge,
     cleanWorld:          world,
     lab:                 world,
     challenge:           undefined,
-    challenges:          challenges,
-    remainingChallenges: challenges,
+    challenges:          [],
+    remainingChallenges: [],
     history:             [],
     maxHistory:          1000,
   })
 }
 
-export let experiment = ({ world, challenges }) => {
+export let experiment = ({ world }) => {
   return I.fromJS({
     mode:                Mode.Experiment,
     cleanWorld:          world,
     lab:                 world,
     challenge:           undefined,
-    challenges:          challenges,
-    remainingChallenges: challenges,
+    challenges:          [],
+    remainingChallenges: [],
     history:             [],
     maxHistory:          1000,
   })

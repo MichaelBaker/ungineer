@@ -1,6 +1,9 @@
-import * as Game       from './data/Game'
-import * as World      from './data/World'
-import * as Square     from './data/Square'
+import _               from 'lodash'
+import * as Game       from '../data/Game'
+import * as World      from '../data/World'
+import * as Square     from '../data/Square'
+import * as Level      from '../data/Level'
+import * as U          from '../Utils'
 
 const world = World.createWorld({
   squares: {
@@ -49,29 +52,55 @@ const world = World.createWorld({
   }
 })
 
-const createChallenge = (world) => {
-  const seed = U.randomSeed()
-  const game = Game.challenge({ world, seed })
+export let randomChallenge = ({world, seed}) => {
+  const startingSeed      = seed
+  const primingIterations = U.randomInt(20)(100)(startingSeed).value
+  const clicks            = U.randomInt(5)(20)(startingSeed).value
+  const squareIds         = world.get('squares').keySeq()
 
-  if (isVictory(game)) {
-    return createChallenge(world)
-  } else {
-    return game
+  let primedWorld = world
+
+  _.times(primingIterations, () => {
+    const { value, newSeed } = U.randomElement(squareIds)(seed)
+    seed        = newSeed
+    primedWorld = World.actuateSquare(value)(primedWorld)
+  })
+
+  let clickedWorld = primedWorld
+
+  _.times(clicks, () => {
+    const { value, newSeed } = U.randomElement(squareIds)(seed)
+    seed         = newSeed
+    clickedWorld = World.actuateSquare(value)(clickedWorld)
+  })
+
+  return {
+    maxClicks: clicks,
+    start: squareIds.reduce((acc, id) => {
+      acc[id] = Square.currentColor(primedWorld.getIn(['squares', id]))
+      return acc
+    }, {}),
+    goal: squareIds.reduce((acc, id) => {
+      acc[id] = Square.currentColor(clickedWorld.getIn(['squares', id]))
+      return acc
+    }, {}),
   }
 }
 
-const isVictory = (game) => I.is(game.get('lab'), game.get('challenge'))
-
-const handleChallengeAction = (action, state) => {
-  if (action.type === 'SelectSquare' ) {
-    const newGame = Game.actuateSquare(action.id)(state)
-    if (isVictory(newGame)) {
-      return newGame.set('victory', true)
-    } else {
-      return newGame
-    }
-  } else {
-    return state
+export default Level.createLevel({
+  game:      Game.experiment({ world }),
+  canToggle: true,
+  title:     "Quaternary",
+  startText: "This is the real deal. When you start a test, 10 random challenges will be generated and they'll be different every time.",
+  endText:   "Welp. I haven't written any more content than this. If you want to take another test, go to experiment mode and click 'Test' again. That will generate a new set of challenges.",
+  generateChallenges: (game) => {
+    return _.times(10, () => {
+      const seed = U.randomSeed()
+      return randomChallenge({world: game.get('cleanWorld'), seed})
+    })
+  },
+  isVictory: (game) => {
+    return game.get('mode') === Game.Mode.Challenge
+      && game.get('remainingChallenges').count() === 0
   }
-}
-
+})
