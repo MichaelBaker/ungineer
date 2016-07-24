@@ -104,7 +104,7 @@ export default class App extends Component {
             <button style={button} onClick={this.toggleMode.bind(this)}>Go Experiment</button>
           </div>
         </div>
-        <div style={guidanceText}>Make the left and right sides match</div>
+        <div style={guidanceText}>{isVictory ? "Nice" : "Make the left and right sides match"}</div>
         <div style={labsStyle('space-between')}>
           <Lab spacing={SquareSpacing} squareSize={SquareSize} canActuate={!isVictory} lab={game.get('lab')} />
           <Lab spacing={SquareSpacing} squareSize={SquareSize} canActuate={false} lab={game.get('challenge')} />

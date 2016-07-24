@@ -57,8 +57,8 @@ export let experiment = ({world}) => I.fromJS({
 
 export let challenge = ({world, seed}) => {
   const startingSeed      = seed
-  const primingIterations = U.randomInt(4)(20)(startingSeed).value
-  const clicks            = U.randomInt(4)(8)(startingSeed).value
+  const primingIterations = U.randomInt(100)(1000)(startingSeed).value
+  const clicks            = U.randomInt(10)(20)(startingSeed).value
   const squareIds         = world.get('squares').keySeq()
 
   let primedWorld = world
