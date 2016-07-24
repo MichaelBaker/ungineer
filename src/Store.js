@@ -8,6 +8,8 @@ import * as Square     from './data/Square'
 const handleExperimentAction = (action, state) => {
   if (action.type === 'SelectSquare' ) {
     return Game.actuateSquare(action.id)(state)
+  } else if (action.type === 'Undo' ) {
+    return Game.undo(state)
   } else {
     return state
   }
@@ -31,6 +33,7 @@ const handleChallengeAction = (action, state) => {
 export const Action = {
   ToggleMode: () => { return { type: 'ToggleMode' } },
   SelectSquare: ({ id }) => { return { type: 'SelectSquare', id } },
+  Undo: () => { return { type: 'Undo' } },
 }
 
 const world = World.createWorld({

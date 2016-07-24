@@ -13,6 +13,8 @@ export default class Lab extends Component {
           return <Square
             canActuate = {canActuate}
             key        = {square.get('id')}
+            size       = {this.props.squareSize}
+            spacing    = {this.props.spacing}
             square     = {square} />
         })}
       </div>

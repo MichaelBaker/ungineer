@@ -2,7 +2,12 @@ import I      from 'immutable'
 import Hashes from 'jshashes'
 
 const sha = new Hashes.SHA256
-const hashToInt = (num) => parseInt("0x" + sha.hex(num.toString()), 16)
+const hashToInt = (num) => {
+  const hex       = sha.hex(num.toString())
+  const hexSlice  = hex.slice(0, 10)
+  const hexString = "0x" + hexSlice
+  return parseInt(hexString, 16)
+}
 
 export let curry = (f) => {
   if (f.length <= 1) {
