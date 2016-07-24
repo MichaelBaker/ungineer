@@ -4,6 +4,7 @@ import { Action }         from '../Store'
 import Level              from './Level'
 import * as Game          from '../data/Game'
 import * as LevelD        from '../data/Level'
+import * as Prog          from '../data/Progression'
 
 const SquareSize    = 100
 const SquareSpacing = 20
@@ -66,6 +67,10 @@ export default class App extends Component {
     this.props.store.dispatch(Action.Progress())
   }
 
+  regress() {
+    this.props.store.dispatch(Action.Regress())
+  }
+
   renderExperiment(game) {
     return (
       <div style={appStyle}>
@@ -102,24 +107,41 @@ export default class App extends Component {
     )
   }
 
-  renderNext(isVictory, nextLevel) {
-    if (isVictory && nextLevel) {
-      return <div onClick={this.progress.bind(this)}>Continue to the next level: {nextLevel.get('title')}</div>
-    } else {
-      return <div></div>
-    }
+  renderNavigation(isVictory, prevLevel, nextLevel) {
+    const back = (() => {
+      if (prevLevel) {
+        return <div onClick={this.regress.bind(this)}>Go back to: {prevLevel.get('title')}</div>
+      } else {
+        return <div></div>
+      }
+    })()
+
+    const forward = (() => {
+      if (isVictory && nextLevel) {
+        return <div onClick={this.progress.bind(this)}>Continue to: {nextLevel.get('title')}</div>
+      } else {
+        return <div></div>
+      }
+    })()
+
+    return (
+      <div>
+        {back}
+        {forward}
+      </div>
+    )
   }
 
   render() {
-    const state          = this.props.state
-    const level          = state.get('level')
-    const nextLevelIndex = state.get('levelIndex') + 1
-    const nextLevel      = state.getIn(['progression', nextLevelIndex, 'level'])
+    const state = this.props.state
+    const level = state.get('level')
+    const { level: nextLevel } = Prog.nextLevel(state)
+    const { level: prevLevel } = Prog.previousLevel(state)
 
     return (
       <div>
         <div style={titleStyle}>Ungineer</div>
-        {this.renderNext(LevelD.isVictory(level), nextLevel)}
+        {this.renderNavigation(LevelD.isVictory(level), prevLevel, nextLevel)}
         <Level level={level} />
       </div>
     )

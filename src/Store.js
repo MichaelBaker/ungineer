@@ -4,22 +4,21 @@ import * as U          from './Utils'
 import * as Game       from './data/Game'
 import * as World      from './data/World'
 import * as Square     from './data/Square'
+import * as Prog       from './data/Progression'
 import Tutorial00      from './levels/tutorial_00'
 
-const progression = I.fromJS([
-  { level: Tutorial00 },
-  { level: Tutorial00 },
-])
 
-const startState = I.fromJS({
-  level:       progression.getIn([0, 'level']),
-  progression: progression,
-  levelIndex:  0,
+const startState = Prog.createProgression({
+  progression: [
+    { level: Tutorial00 },
+    { level: Tutorial00 },
+  ],
 })
 
 export const Action = {
   SelectSquare: ({squareId}) => { return { type: 'SelectSquare', squareId } },
   Progress: () => { return { type: 'Progress' } },
+  Regress: () => { return { type: 'Regress' } },
 }
 
 export const emptyStore = createStore((state = startState, action) => {
@@ -28,16 +27,9 @@ export const emptyStore = createStore((state = startState, action) => {
       return Game.actuateSquare(action.squareId)(game)
     })
   } else if (action.type === 'Progress') {
-    const nextLevelIndex = state.get('levelIndex') + 1
-    const nextLevel      = state.getIn(['progression', nextLevelIndex, 'level'])
-
-    if (nextLevel) {
-      return state
-        .set('level',      nextLevel)
-        .set('levelIndex', nextLevelIndex)
-    } else {
-      return state
-    }
+    return Prog.progress(state)
+  } else if (action.type === 'Regress') {
+    return Prog.regress(state)
   } else {
     return state
   }
