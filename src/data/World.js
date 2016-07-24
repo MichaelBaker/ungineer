@@ -34,3 +34,11 @@ export let react = U.curry((exceptSquareIds, originalWorld) => {
 export let actuateSquare = (squareId) => {
   return U.compose([cycleColor(squareId), react([squareId])])
 }
+
+export let setColors = U.curry((mapping, world) => {
+  return mapping.reduce((acc, color, squareId) => {
+    return acc.updateIn(['squares', squareId], (square) => {
+      return Square.cycleToColor(color)(square)
+    })
+  }, world)
+})

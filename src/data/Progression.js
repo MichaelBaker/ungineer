@@ -1,4 +1,5 @@
-import I from 'immutable'
+import I         from 'immutable'
+import * as Game from './Game'
 
 export let createProgression = ({ progression }) => {
   return I.fromJS({
@@ -52,4 +53,10 @@ export let regress = (progression) => {
   } else {
     return progression
   }
+}
+
+export let toggleMode = (progression) => {
+  return progression.updateIn(['level', 'game'], (game) => {
+    return Game.toggleMode(game)
+  })
 }

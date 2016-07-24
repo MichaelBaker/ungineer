@@ -47,15 +47,7 @@ export let actuateSquare = (squareId) => {
   return U.compose([saveHistory, cycleColor(squareId), react([squareId])])
 }
 
-export let experiment = ({world}) => I.fromJS({
-  mode:       Mode.Experiment,
-  cleanWorld: world,
-  lab:        world,
-  history:    I.fromJS([]),
-  maxHistory: 1000,
-})
-
-export let challenge = ({world, seed}) => {
+export let randomChallenge = ({world, seed}) => {
   const startingSeed      = seed
   const primingIterations = U.randomInt(100)(1000)(startingSeed).value
   const clicks            = U.randomInt(10)(20)(startingSeed).value
@@ -90,4 +82,72 @@ export let challenge = ({world, seed}) => {
     history:    I.fromJS([]),
     maxHistory: 1000,
   })
+}
+
+export let challenge = ({world, challenges}) => {
+  return I.fromJS({
+    mode:                Mode.Challenge,
+    cleanWorld:          world,
+    lab:                 world,
+    challenge:           undefined,
+    challenges:          challenges,
+    remainingChallenges: challenges,
+    history:             [],
+    maxHistory:          1000,
+  })
+}
+
+export let experiment = ({ world, challenges }) => {
+  return I.fromJS({
+    mode:                Mode.Experiment,
+    cleanWorld:          world,
+    lab:                 world,
+    challenge:           undefined,
+    challenges:          challenges,
+    remainingChallenges: challenges,
+    history:             [],
+    maxHistory:          1000,
+  })
+}
+
+export let activateChallenge = (game) => {
+  if (gameMode(game) !== Mode.Challenge)             return game
+  if (game.get('remainingChallenges').count() === 0) return game
+
+  const challenge = game.getIn(['remainingChallenges', 0])
+
+  return game
+    .set('lab',       World.setColors(challenge.get('start'))(game.get('cleanWorld')))
+    .set('challenge', World.setColors(challenge.get('goal'))(game.get('cleanWorld')))
+    .set('clicksRemaining', challenge.get('maxClicks'))
+}
+
+export let toggleMode = (game) => {
+  if (gameMode(game) === Mode.Experiment) {
+    return activateChallenge(game
+      .set('lab', game.get('cleanWorld'))
+      .set('mode', Mode.Challenge)
+      .set('remainingChallenges', game.get('challenges'))
+      .set('history', I.fromJS([])))
+  } else if (gameMode(game) === Mode.Challenge) {
+    return game
+      .set('lab', game.get('cleanWorld'))
+      .set('mode', Mode.Experiment)
+      .set('remainingChallenges', I.fromJS([]))
+      .set('history', I.fromJS([]))
+  } else {
+    return game
+  }
+}
+
+export let tryChallengeComplete = (game) => {
+  const lab       = game.get('lab')
+  const challenge = game.get('challenge')
+
+  if (!challenge) return game
+  if (I.is(lab, challenge)) {
+    return activateChallenge(game.update('remainingChallenges', (a) => a.shift()))
+  } else {
+    return game
+  }
 }

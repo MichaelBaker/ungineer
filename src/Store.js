@@ -6,12 +6,13 @@ import * as World      from './data/World'
 import * as Square     from './data/Square'
 import * as Prog       from './data/Progression'
 import Tutorial00      from './levels/tutorial_00'
+import Tutorial01      from './levels/tutorial_01'
 
 
 const startState = Prog.createProgression({
   progression: [
-    { level: Tutorial00 },
-    { level: Tutorial00 },
+    // { level: Tutorial00 },
+    { level: Tutorial01 },
   ],
 })
 
@@ -19,17 +20,35 @@ export const Action = {
   SelectSquare: ({squareId}) => { return { type: 'SelectSquare', squareId } },
   Progress: () => { return { type: 'Progress' } },
   Regress: () => { return { type: 'Regress' } },
+  ToggleMode: () => { return { type: 'ToggleMode' } },
 }
 
 export const emptyStore = createStore((state = startState, action) => {
   if (action.type === 'SelectSquare' ) {
-    return state.updateIn(['level', 'game'], (game) => {
-      return Game.actuateSquare(action.squareId)(game)
-    })
+    const mode = Game.gameMode(state.getIn(['level', 'game']))
+    if (mode === Game.Mode.Experiment) {
+      return state.updateIn(['level', 'game'], (game) => {
+        return Game.actuateSquare(action.squareId)(game)
+      })
+    } else if (mode === Game.Mode.Challenge) {
+      return state.updateIn(['level', 'game'], (game) => {
+        const clicksRemaining = game.get('clicksRemaining')
+        if (clicksRemaining === 0) {
+          return game
+        } else if (!clicksRemaining) {
+          return Game.tryChallengeComplete(Game.actuateSquare(action.squareId)(game))
+        } else {
+          const clickedGame = game.set('clicksRemaining', clicksRemaining - 1)
+          return Game.tryChallengeComplete(Game.actuateSquare(action.squareId)(clickedGame))
+        }
+      })
+    }
   } else if (action.type === 'Progress') {
     return Prog.progress(state)
   } else if (action.type === 'Regress') {
     return Prog.regress(state)
+  } else if (action.type === 'ToggleMode') {
+    return Prog.toggleMode(state)
   } else {
     return state
   }
