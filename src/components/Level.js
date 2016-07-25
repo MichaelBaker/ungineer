@@ -4,9 +4,7 @@ import { Action }         from '../Store'
 import Lab                from './Lab'
 import * as LevelD        from '../data/Level'
 import * as Game          from '../data/Game'
-
-const SquareSize    = 100
-const SquareSpacing = 20
+import * as Const         from '../Constants'
 
 export default class Level extends Component {
   toggleMode() {
@@ -19,40 +17,39 @@ export default class Level extends Component {
 
   renderText(isVictory, startText, endText) {
     if (isVictory) {
-      return <div>{endText}</div>
+      return <div style={textStyle}>{endText}</div>
     } else {
-      return <div>{startText}</div>
+      return <div style={textStyle}>{startText}</div>
     }
   }
 
   renderControls(isVictory, canToggle, game, level) {
     if (isVictory) return <div />
 
-    const toggle = (() => {
-      const mode = game.get('mode')
-      if (!canToggle) {
-        return <div />
-      } else if (Game.gameMode(game) === Game.Mode.Experiment) {
-        return <button onClick={this.toggleMode.bind(this)}>Start Test</button>
-      } else if (Game.gameMode(game) === Game.Mode.Challenge) {
-        return <button onClick={this.toggleMode.bind(this)}>Go Experiment</button>
-      }
-    })()
+    let buttons = []
 
-    const undo = (() => {
-      const mode    = game.get('mode')
-      const canUndo = level.get('canUndo')
-      if (mode === Game.Mode.Experiment && canUndo) {
-        return <button onClick={this.undo.bind(this)}>Undo</button>
-      } else {
-        return <div />
+    const mode    = game.get('mode')
+    const canUndo = level.get('canUndo')
+    if (mode === Game.Mode.Experiment && canUndo) {
+      const style = {
+        ...buttonStyle,
+        color: game.get('history').count() > 0 ? 'black' : 'ccc'
       }
-    })()
+      buttons.push(<button key="undo" style={style} onClick={this.undo.bind(this)}>Undo</button>)
+    }
+
+    if (!canToggle) {
+    } else if (Game.gameMode(game) === Game.Mode.Experiment) {
+      buttons.push(<button key="toggle" style={buttonStyle} onClick={this.toggleMode.bind(this)}>Start Test</button>)
+    } else if (Game.gameMode(game) === Game.Mode.Challenge) {
+      buttons.push(<button key="toggle" style={buttonStyle} onClick={this.toggleMode.bind(this)}>Go Experiment</button>)
+    }
+
+    const justify = buttons.length > 1 ? 'space-between' : 'center'
 
     return (
-      <div>
-        {toggle}
-        {undo}
+      <div style={controlStyle(justify)}>
+        {buttons}
       </div>
     )
   }
@@ -64,17 +61,28 @@ export default class Level extends Component {
 
     if (mode === Game.Mode.Challenge && challenge) {
       return (
-        <div>
-          <div>Clicks Remaining: {game.get('clicksRemaining')}</div>
-          <div>Tests Remaining:  {game.get('remainingChallenges').count()}</div>
-          <Lab squareSize = {SquareSize} spacing = {SquareSpacing} canActuate = {!isVictory} lab = {lab} />
-          <Lab squareSize = {SquareSize} spacing = {SquareSpacing} canActuate = {false} lab = {challenge} />
+        <div style={widgetsStyle('space-between')}>
+          <Lab squareSize = {Const.SquareSize} spacing = {Const.SquareSpacing} canActuate = {!isVictory} lab = {lab} />
+          <Lab squareSize = {Const.SquareSize} spacing = {Const.SquareSpacing} canActuate = {false} lab = {challenge} />
         </div>
       )
     } else if (mode === Game.Mode.Experiment) {
       return (
-        <div>
-          <Lab squareSize = {SquareSize} spacing = {SquareSpacing} canActuate = {!isVictory} lab = {lab} />
+        <div style={widgetsStyle('center')}>
+          <Lab squareSize = {Const.SquareSize} spacing = {Const.SquareSpacing} canActuate = {!isVictory} lab = {lab} />
+        </div>
+      )
+    }
+  }
+
+  renderStatus(game) {
+    const mode = Game.gameMode(game)
+
+    if (mode === Game.Mode.Challenge) {
+      return (
+        <div style={statusStyle}>
+          <div style={status}>Tests<br/>{game.get('remainingChallenges').count()}</div>
+          <div style={status}>Clicks<br/>{game.get('clicksRemaining')}</div>
         </div>
       )
     }
@@ -88,9 +96,10 @@ export default class Level extends Component {
     const canToggle = level.get('canToggle')
 
     return (
-      <div>
+      <div style={levelStyle}>
         {this.renderText(isVictory, level.get('startText'), level.get('endText'))}
         {this.renderControls(isVictory, canToggle, game, level)}
+        {this.renderStatus(game)}
         {this.renderWidgets(isVictory, game)}
       </div>
     )
@@ -99,4 +108,51 @@ export default class Level extends Component {
 
 Level.contextTypes = {
   store: React.PropTypes.object
+}
+
+const levelStyle = {
+  display:       'flex',
+  flexDirection: 'column',
+}
+
+const widgetsStyle = (justify) => {
+  return {
+    display:        'flex',
+    flexDirection:  'row',
+    justifyContent: justify,
+  }
+}
+
+const textStyle = {
+  marginBottom: 40,
+  textAlign: 'justify',
+}
+
+const controlStyle = (justify) => {
+  return {
+    display:       'flex',
+    flexDirection: 'row',
+    justifyContent: justify,
+    marginBottom:   40,
+  }
+}
+
+const buttonStyle = {
+  background: 'none',
+  border:     'none',
+  outline:    'none',
+  cursor:     'default',
+  flex:       '1 1',
+}
+
+const statusStyle = {
+  marginBottom:  40,
+  display:       'flex',
+  flexDirection: 'row',
+  textAlign:     'center',
+  justify:       'space-between',
+}
+
+const status = {
+  flex: '1 1',
 }

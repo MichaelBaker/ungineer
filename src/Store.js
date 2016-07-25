@@ -12,8 +12,8 @@ import FinalLevel      from './levels/final_level'
 
 const startState = Prog.createProgression({
   progression: [
-    // { level: Tutorial00 },
-    // { level: Tutorial01 },
+    { level: Tutorial00 },
+    { level: Tutorial01 },
     { level: FinalLevel },
   ],
 })

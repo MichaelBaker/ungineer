@@ -5,6 +5,7 @@ import Level              from './Level'
 import * as Game          from '../data/Game'
 import * as LevelD        from '../data/Level'
 import * as Prog          from '../data/Progression'
+import * as Const         from '../Constants'
 
 export default class App extends Component {
   getChildContext() {
@@ -22,7 +23,7 @@ export default class App extends Component {
   renderNavigation(isVictory, prevLevel, nextLevel) {
     const back = (() => {
       if (prevLevel) {
-        return <div onClick={this.regress.bind(this)}>Go back to: {prevLevel.get('title')}</div>
+        return <div onClick={this.regress.bind(this)}>{"<~ "}{prevLevel.get('title')}</div>
       } else {
         return <div></div>
       }
@@ -30,14 +31,14 @@ export default class App extends Component {
 
     const forward = (() => {
       if (isVictory && nextLevel) {
-        return <div onClick={this.progress.bind(this)}>Continue to: {nextLevel.get('title')}</div>
+        return <div onClick={this.progress.bind(this)}>{nextLevel.get('title')}{" ~>"}</div>
       } else {
         return <div></div>
       }
     })()
 
     return (
-      <div>
+      <div style={navigationStyle}>
         {back}
         {forward}
       </div>
@@ -51,8 +52,8 @@ export default class App extends Component {
     const { level: prevLevel } = Prog.previousLevel(state)
 
     return (
-      <div>
-        <div>Ungineer</div>
+      <div style={appStyle}>
+        <div style={titleStyle}>Ungineer</div>
         {this.renderNavigation(LevelD.isVictory(level), prevLevel, nextLevel)}
         <Level level={level} />
       </div>
@@ -62,4 +63,26 @@ export default class App extends Component {
 
 App.childContextTypes = {
   store: React.PropTypes.object
+}
+
+const appStyle = {
+  display:       'flex',
+  flexDirection: 'column',
+  padding:       40,
+  margin:        'auto',
+  width:         (Const.SquareSize * 2) + Const.SquareSpacing,
+}
+
+const titleStyle = {
+  textAlign:    'center',
+  fontSize:     48,
+  fontFamily:   'JunctionRegular',
+  marginBottom: 40,
+}
+
+const navigationStyle = {
+  display:        'flex',
+  flexDirection:  'row',
+  justifyContent: 'space-between',
+  marginBottom:    40,
 }
