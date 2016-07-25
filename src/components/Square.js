@@ -5,6 +5,7 @@ export default class Square extends Component {
   select() {
     if (this.props.canActuate) {
       const action = Action.SelectSquare({ squareId: this.props.square.get('id') })
+      console.log('click')
       this.context.store.dispatch(action)
     }
   }
@@ -18,7 +19,7 @@ export default class Square extends Component {
       background:   square.get('colors').get(0),
     }
 
-    return <div style={style} onClick={this.select.bind(this)}/>
+    return <div key={square.get('id')} style={style} onClick={this.select.bind(this)}/>
   }
 }
 

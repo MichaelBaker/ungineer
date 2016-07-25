@@ -28,6 +28,7 @@ export default Level.createLevel({
   game,
   canToggle: true,
   canUndo:   true,
+  key:       'tutorial_01',
   title:     "Constraints",
   startText: "Here is a simple binary system. The colors of these two widgets are governed by some simple constraints. Figure out what the rules are by changing one of the widgets and noting how the other one changes. Once you understand the rules of the system, you should be able to predict what will happen before you actually click on a widget. You can click 'Undo' to go back one click. Once you think you've figured it out, click 'Test' to test your predictive power.",
   endText:   "Ok, you've either figured out how the system works or you've guessed your way to victory. Either way, a more complicated challenge awaits you.",

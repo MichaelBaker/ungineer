@@ -15,6 +15,7 @@ export default Level.createLevel({
   game,
   canToggle: false,
   canUndo:   false,
+  key:       'tutorial_00',
   title:     "Widgets",
   startText: "Welcome to Ungineer, the game of reverse engineering. This is a widget. Your first task is to figure out how to make the widget yellow.",
   endText:   "Now that you've done that, what have you learned about the way widgets work? What rule governs how the widget changes color?",

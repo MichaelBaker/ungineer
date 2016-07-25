@@ -32,7 +32,7 @@ export default class Level extends Component {
     const canUndo = level.get('canUndo')
     if (mode === Game.Mode.Experiment && canUndo) {
       const style = {
-        ...buttonStyle,
+        ...Const.ButtonStyle,
         color: game.get('history').count() > 0 ? 'black' : 'ccc'
       }
       buttons.push(<button key="undo" style={style} onClick={this.undo.bind(this)}>Undo</button>)
@@ -40,9 +40,9 @@ export default class Level extends Component {
 
     if (!canToggle) {
     } else if (Game.gameMode(game) === Game.Mode.Experiment) {
-      buttons.push(<button key="toggle" style={buttonStyle} onClick={this.toggleMode.bind(this)}>Start Test</button>)
+      buttons.push(<button key="toggle" style={Const.ButtonStyle} onClick={this.toggleMode.bind(this)}>Start Test</button>)
     } else if (Game.gameMode(game) === Game.Mode.Challenge) {
-      buttons.push(<button key="toggle" style={buttonStyle} onClick={this.toggleMode.bind(this)}>Go Experiment</button>)
+      buttons.push(<button key="toggle" style={Const.ButtonStyle} onClick={this.toggleMode.bind(this)}>Go Experiment</button>)
     }
 
     const justify = buttons.length > 1 ? 'space-between' : 'center'
@@ -135,14 +135,6 @@ const controlStyle = (justify) => {
     justifyContent: justify,
     marginBottom:   40,
   }
-}
-
-const buttonStyle = {
-  background: 'none',
-  border:     'none',
-  outline:    'none',
-  cursor:     'default',
-  flex:       '1 1',
 }
 
 const statusStyle = {

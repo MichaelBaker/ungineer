@@ -35,6 +35,7 @@ export let progress = (progression) => {
   const { level, index } = nextLevel(progression)
 
   if (level) {
+    localStorage.setItem(level.get('key'), true)
     return progression
       .set('level',      level)
       .set('levelIndex', index)

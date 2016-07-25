@@ -20,10 +20,18 @@ export default class App extends Component {
     this.props.store.dispatch(Action.Regress())
   }
 
+  tildes(text) {
+    let tildes = ""
+    for (var i = 0; i < text.length-4; i++) {
+      tildes = tildes + "~"
+    }
+    return tildes
+  }
+
   renderNavigation(isVictory, prevLevel, nextLevel) {
     const back = (() => {
       if (prevLevel) {
-        return <div onClick={this.regress.bind(this)}>{"<~ "}{prevLevel.get('title')}</div>
+        return <button style={{...Const.ButtonStyle, textAlign: 'left'}} onClick={this.regress.bind(this)}>{prevLevel.get('title')}<br/>{"<" + this.tildes(prevLevel.get('title'))}</button>
       } else {
         return <div></div>
       }
@@ -31,7 +39,9 @@ export default class App extends Component {
 
     const forward = (() => {
       if (isVictory && nextLevel) {
-        return <div onClick={this.progress.bind(this)}>{nextLevel.get('title')}{" ~>"}</div>
+        return <button style={{...Const.ButtonStyle, textAlign: 'right'}} onClick={this.progress.bind(this)}>{nextLevel.get('title')}{this.tildes(nextLevel.get('title')) + ">"}</button>
+      } else if (nextLevel && localStorage.getItem(nextLevel.get('key'))) {
+        return <button style={{...Const.ButtonStyle, textAlign: 'right'}} onClick={this.progress.bind(this)}>{nextLevel.get('title')}<br/>{this.tildes(nextLevel.get('title')) + ">"}</button>
       } else {
         return <div></div>
       }
