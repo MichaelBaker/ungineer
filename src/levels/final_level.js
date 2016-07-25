@@ -90,6 +90,7 @@ export let randomChallenge = ({world, seed}) => {
 export default Level.createLevel({
   game:      Game.experiment({ world }),
   canToggle: true,
+  canUndo:   true,
   title:     "Quaternary",
   startText: "This is the real deal. When you start a test, 10 random challenges will be generated and they'll be different every time.",
   endText:   "Welp. I haven't written any more content than this. If you want to take another test, go to experiment mode and click 'Test' again. That will generate a new set of challenges.",

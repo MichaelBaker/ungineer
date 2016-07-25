@@ -23,6 +23,7 @@ export const Action = {
   Progress: () => { return { type: 'Progress' } },
   Regress: () => { return { type: 'Regress' } },
   ToggleMode: () => { return { type: 'ToggleMode' } },
+  Undo: () => { return { type: 'Undo' } },
 }
 
 export const emptyStore = createStore((state = startState, action) => {
@@ -45,6 +46,8 @@ export const emptyStore = createStore((state = startState, action) => {
         }
       })
     }
+  } else if (action.type === 'Undo') {
+    return Prog.undo(state)
   } else if (action.type === 'Progress') {
     return Prog.progress(state)
   } else if (action.type === 'Regress') {

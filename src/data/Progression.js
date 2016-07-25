@@ -64,3 +64,9 @@ export let toggleMode = (progression) => {
     return Game.toggleMode(game.set('challenges', challenges))
   })
 }
+
+export let undo = (progression) => {
+  return progression.updateIn(['level', 'game'], (game) => {
+    return Game.undo(game)
+  })
+}

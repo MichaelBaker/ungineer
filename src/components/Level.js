@@ -13,6 +13,10 @@ export default class Level extends Component {
     this.context.store.dispatch(Action.ToggleMode())
   }
 
+  undo() {
+    this.context.store.dispatch(Action.Undo())
+  }
+
   renderText(isVictory, startText, endText) {
     if (isVictory) {
       return <div>{endText}</div>
@@ -21,7 +25,7 @@ export default class Level extends Component {
     }
   }
 
-  renderControls(isVictory, canToggle, game) {
+  renderControls(isVictory, canToggle, game, level) {
     if (isVictory) return <div />
 
     const toggle = (() => {
@@ -35,9 +39,20 @@ export default class Level extends Component {
       }
     })()
 
+    const undo = (() => {
+      const mode    = game.get('mode')
+      const canUndo = level.get('canUndo')
+      if (mode === Game.Mode.Experiment && canUndo) {
+        return <button onClick={this.undo.bind(this)}>Undo</button>
+      } else {
+        return <div />
+      }
+    })()
+
     return (
       <div>
         {toggle}
+        {undo}
       </div>
     )
   }
@@ -75,7 +90,7 @@ export default class Level extends Component {
     return (
       <div>
         {this.renderText(isVictory, level.get('startText'), level.get('endText'))}
-        {this.renderControls(isVictory, canToggle, game)}
+        {this.renderControls(isVictory, canToggle, game, level)}
         {this.renderWidgets(isVictory, game)}
       </div>
     )
