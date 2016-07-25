@@ -39,7 +39,7 @@ export default class App extends Component {
 
     const forward = (() => {
       if (isVictory && nextLevel) {
-        return <button style={{...Const.ButtonStyle, textAlign: 'right'}} onClick={this.progress.bind(this)}>{nextLevel.get('title')}{this.tildes(nextLevel.get('title')) + ">"}</button>
+        return <button style={{...Const.ButtonStyle, textAlign: 'right'}} onClick={this.progress.bind(this)}>{nextLevel.get('title')}<br/>{this.tildes(nextLevel.get('title')) + ">"}</button>
       } else if (nextLevel && localStorage.getItem(nextLevel.get('key'))) {
         return <button style={{...Const.ButtonStyle, textAlign: 'right'}} onClick={this.progress.bind(this)}>{nextLevel.get('title')}<br/>{this.tildes(nextLevel.get('title')) + ">"}</button>
       } else {
