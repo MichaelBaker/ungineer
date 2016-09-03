@@ -11,7 +11,6 @@ export default class Square extends Component {
     const square = this.props.square
     const style = {
       ...this.props.style_,
-      marginBottom: this.props.spacing || 0,
       width:        this.props.size || 100,
       height:       this.props.size || 100,
       background:   square.get('colors').get(0),
