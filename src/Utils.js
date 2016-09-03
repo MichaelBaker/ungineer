@@ -1,5 +1,10 @@
-import I      from 'immutable'
-import Hashes from 'jshashes'
+import I         from 'immutable'
+import Hashes    from 'jshashes'
+import Tweenable from 'shifty'
+
+export let animate = (args) => {
+  return new Tweenable().tween(args)
+}
 
 const sha = new Hashes.SHA256
 const hashToInt = (num) => {

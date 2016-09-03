@@ -1,28 +1,26 @@
 import React, {Component} from 'react'
-import { Action }         from '../Store'
 
 export default class Square extends Component {
   select() {
     if (this.props.canActuate) {
-      const action = Action.SelectSquare({ squareId: this.props.square.get('id') })
-      console.log('click')
-      this.context.store.dispatch(action)
+      this.props.onClick(this.props.square)
     }
   }
 
   render() {
     const square = this.props.square
     const style = {
-      marginBottom: this.props.spacing,
-      width:        this.props.size,
-      height:       this.props.size,
+      ...this.props.style_,
+      marginBottom: this.props.spacing || 0,
+      width:        this.props.size || 100,
+      height:       this.props.size || 100,
       background:   square.get('colors').get(0),
+      cursor:       'pointer',
+      border:       'none',
+      display:      'block',
+      outline:      0,
     }
 
-    return <div key={square.get('id')} style={style} onClick={this.select.bind(this)}/>
+    return <button key={square.get('id')} style={style} onClick={this.select.bind(this)}/>
   }
-}
-
-Square.contextTypes = {
-  store: React.PropTypes.object
 }
