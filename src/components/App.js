@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import Redux              from 'redux'
 import { Action }         from '../Store'
 import * as Const         from '../Constants'
+import Levels             from '../Levels'
 
 export default class App extends Component {
   getChildContext() {
@@ -10,7 +11,7 @@ export default class App extends Component {
 
   render() {
     const state      = this.props.state
-    const Level      = state.getIn(['level', 'component'])
+    const Level      = Levels[state.getIn(['level', 'levelName'])]
     const levelState = state.getIn(['level', 'state'])
 
     return (

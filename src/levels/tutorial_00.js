@@ -22,13 +22,15 @@ const paragraphSets = {
     "If I give you a color, can you predict what color will come after it?",
     "Click \"Start Test\" once you think you've got it.",
   ],
+  test: [
+    "Select the widget from the right that comes after the widget on the left.",
+  ],
 }
 
 // TODO
 // * Add dispatch to the context
 // * Replace UpdateState with SetState
-// * What is the pattern?
-// * Click "test" when you're ready.
+// * Add Test
 
 const animations = {
   paragraph: (self, state, dispatch) => {
@@ -58,11 +60,15 @@ const animations = {
   },
 }
 
-class LevelComponent extends Component {
+export class LevelComponent extends Component {
 
   handleClick(square) {
     const newSquare = Square.cycleColor(square)
     this.context.store.dispatch(Action.UpdateLevel({ square: newSquare }))
+  }
+
+  handleGuess(square) {
+    console.log(Square.currentColor(square))
   }
 
   startAnimation(animationName) {
@@ -125,6 +131,18 @@ class LevelComponent extends Component {
     }
   }
 
+  startTest() {
+    this.context.store.dispatch(Action.UpdateLevel({
+      phase:  3,
+      square: Square.createSquare({ id: 0, colors: ['blue', 'green', 'yellow', 'red'], reaction: () => {} }),
+      animation: {
+        paragraphs: 'test',
+        opacity:    0,
+        paragraph:  0,
+      }
+    }))
+  }
+
   renderParagraph(p, i) {
     const opacity = (() => {
       const paragraph = this.props.data.getIn(['animation', 'paragraph'])
@@ -143,9 +161,10 @@ class LevelComponent extends Component {
       opacity:      opacity,
       width:        '100%',
       marginBottom: 20,
+      textAlign:    'justify',
     }
 
-    return <div key={i} style={style}>{p}</div>
+    return <p key={i} style={style}>{p}</p>
   }
 
   renderParagraphs() {
@@ -171,7 +190,55 @@ class LevelComponent extends Component {
         opacity:      this.props.data.getIn(['animation', 'opacity']),
         outline:      0,
       }
-      return <button style={style}>Start Test</button>
+      return <button style={style} onClick={this.startTest.bind(this)}>Start Test</button>
+    }
+  }
+
+  renderWidgets() {
+    const square = this.props.data.get('square')
+    const phase  = this.props.data.get('phase')
+    if (phase < 3) {
+      return <SquareComp style_={{ margin: '20 auto 60' }} square={square} canActuate={true} onClick={this.handleClick.bind(this)}/>
+    } else if (phase == 3) {
+      const spacing = 20
+      const size    = 80
+
+      const divStyle = {
+        display:        'flex',
+        alignItems:     'center',
+        justifyContent: 'space-between',
+      }
+
+      const guessStyle = {
+        flex:          '0 0 auto',
+        display:       'flex',
+        flexDirection: 'column',
+      }
+
+      const squareStyle = {
+        flex:         '0 0 auto',
+        marginBottom: spacing,
+      }
+
+      const options = [
+        Square.createSquare({ id: 0, colors: ['yellow'], reaction: () => {} }),
+        Square.createSquare({ id: 1, colors: ['red'],    reaction: () => {} }),
+        Square.createSquare({ id: 2, colors: ['blue'],   reaction: () => {} }),
+        Square.createSquare({ id: 3, colors: ['green'],  reaction: () => {} }),
+      ]
+
+      const components = options.map((square) => {
+        return <SquareComp size={size} key={square.get('id')} style_={squareStyle} square={square} canActuate={true} onClick={this.handleGuess.bind(this)} />
+      })
+
+      return (
+        <div style={divStyle}>
+          <SquareComp style_={squareStyle} size={size} square={square} canActuate={false} />
+          <div style={guessStyle}>
+            {components}
+          </div>
+        </div>
+      )
     }
   }
 
@@ -180,7 +247,7 @@ class LevelComponent extends Component {
 
     return (
       <div>
-        <SquareComp style_={{ margin: '20 auto 60' }} square={square} canActuate={true} onClick={this.handleClick.bind(this)}/>
+        {this.renderWidgets()}
         {this.renderParagraphs()}
         {this.renderTest()}
       </div>
@@ -193,7 +260,7 @@ LevelComponent.contextTypes = {
 }
 
 export default I.fromJS({
-  component: LevelComponent,
+  levelName: 'Tutorial00',
   state: {
     phase:     0,
     square:    Square.createSquare({ id: 0, colors: ['red', 'blue', 'green', 'yellow'], reaction: () => {} }),

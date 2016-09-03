@@ -32,7 +32,9 @@
     "react": "^0.14.5",
     "react-dom": "^0.14.5",
     "redux": "^3.5.2",
-    "shifty": "^1.5.2"
+    "shifty": "^1.5.2",
+    "transit-immutable-js": "^0.6.0",
+    "transit-js": "^0.8.846"
   },
   "devDependencies": {
     "babel-core": "^6.3.21",
