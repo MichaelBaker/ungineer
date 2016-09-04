@@ -1,3 +1,5 @@
+import _                  from 'lodash'
+import * as U             from '../Utils'
 import I                  from 'immutable'
 import React, {Component} from 'react'
 import { Action }         from '../Store'
@@ -17,13 +19,33 @@ const paragraphSets = {
   ],
   third: [
     "Do you know what the pattern is?",
-    "Ungineering is about building mental models of unseen relationships.",
-    "You test your mental model by making predictions.",
+    "Ungineering is about building mental models of implicit relationships.",
+    "What is the relationship between the current color and the next color?",
+    "You test how good your mental model is by making predictions.",
     "If I give you a color, can you predict what color will come after it?",
     "Click \"Start Test\" once you think you've got it.",
   ],
   test: [
-    "Select the widget from the right that comes after the widget on the left.",
+    "Select the widget on the right that comes after the widget on the left.",
+  ],
+  failure: [
+    "Nope.",
+    "Your mental model is out of sync with reality.",
+    "This is the power of prediction.",
+    "A successful prediction gives you a bit of evidence that the world as you see it is the same as the world in reality.",
+    "A failed prediction tells you that your view of reality is distorted and needs to be corrected.",
+    "Click \"Experiment\" to go back and gain a better understanding of the widget.",
+  ],
+  experiment: [
+    "Experimentation is how you gather the data that informs your model.",
+    "Prediction is how you test the model for correctness.",
+    "Try to visualize the different color transitions.",
+    "Test yourself before starting the formal test. Predict the next color, click on the widget, and see if you're right.",
+    "Once you're right every time, you're ready to take the test again.",
+    "Click \"Start Test\" once you think you've got it.",
+  ],
+  followUps: [
+    "Nice. Can you do it nine more times in a row?",
   ],
 }
 
@@ -68,7 +90,36 @@ export class LevelComponent extends Component {
   }
 
   handleGuess(square) {
-    console.log(Square.currentColor(square))
+    const startSquare   = this.props.data.get('square')
+    const nextSquare    = Square.cycleColor(startSquare)
+    const expectedColor = Square.currentColor(nextSquare)
+    const selection     = Square.currentColor(square)
+
+    if (expectedColor === selection) {
+      this.context.store.dispatch(Action.UpdateLevel({
+        phase:  'followUps',
+        square: nextSquare,
+        animation: {
+          opacity:    0.0,
+          paragraph:  0,
+          paragraphs: 'followUps',
+        },
+      }))
+    } else {
+      this.context.store.dispatch(Action.UpdateLevel({
+        phase:  'failure',
+        square: startSquare,
+        animation: {
+          opacity:    0.0,
+          paragraph:  0,
+          paragraphs: 'failure',
+        },
+      }))
+    }
+  }
+
+  getPhase() {
+    return this.props.data.get('phase')
   }
 
   startAnimation(animationName) {
@@ -89,7 +140,7 @@ export class LevelComponent extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const phase        = this.props.data.get('phase')
+    const phase        = this.getPhase()
     const currentColor = Square.currentColor(this.props.data.get('square'))
     const nextColor    = Square.currentColor(nextProps.data.get('square'))
 
@@ -116,7 +167,7 @@ export class LevelComponent extends Component {
 
   componentDidUpdate(prevProps) {
     const oldPhase         = prevProps.data.get('phase')
-    const newPhase         = this.props.data.get('phase')
+    const newPhase         = this.getPhase()
     const oldParagraph     = prevProps.data.getIn(['animation', 'paragraph'])
     const newParagraph     = this.props.data.getIn(['animation', 'paragraph'])
     const oldAnimationName = prevProps.data.getIn(['animation', 'name'])
@@ -132,15 +183,37 @@ export class LevelComponent extends Component {
   }
 
   startTest() {
+    const seed   = U.randomSeed()
+    const cycles = U.randomInt(0)(3)(seed).value
+
+    let square = Square.createSquare({ id: 0, colors: ['blue', 'green', 'yellow', 'red'], reaction: () => {} })
+
+    _.times(cycles, () => { square = Square.cycleColor(square) })
+
     this.context.store.dispatch(Action.UpdateLevel({
-      phase:  3,
-      square: Square.createSquare({ id: 0, colors: ['blue', 'green', 'yellow', 'red'], reaction: () => {} }),
+      phase:  'test',
+      square: square,
       animation: {
         paragraphs: 'test',
         opacity:    0,
         paragraph:  0,
       }
     }))
+  }
+
+  experiment() {
+    this.context.store.dispatch(Action.UpdateLevel({
+      phase:  'experiment',
+      square: startSquare,
+      animation: {
+        opacity:    0.0,
+        paragraph:  0,
+        paragraphs: 'experiment',
+      },
+    }))
+  }
+
+  finish() {
   }
 
   renderParagraph(p, i) {
@@ -173,33 +246,41 @@ export class LevelComponent extends Component {
     return paragraphs.map(this.renderParagraph.bind(this))
   }
 
-  renderTest() {
-    const phase      = this.props.data.get('phase')
+  renderButtons() {
+    const phase      = this.getPhase()
     const paragraphs = paragraphSets[this.props.data.getIn(['animation', 'paragraphs'])]
     const paragraph  = this.props.data.getIn(['animation', 'paragraph'])
 
+    const style ={
+      margin:       'auto',
+      display:      'block',
+      marginTop:    40,
+      border:       'none',
+      background:   'none',
+      borderBottom: '1px solid black',
+      cursor:       'pointer',
+      outline:      0,
+      opacity:       this.props.data.getIn(['animation', 'opacity']),
+    }
+
     if (phase === 2 && paragraph == paragraphs.length - 1) {
-      const style ={
-        margin:       'auto',
-        display:      'block',
-        marginTop:    40,
-        border:       'none',
-        background:   'none',
-        borderBottom: '1px solid black',
-        cursor:       'pointer',
-        opacity:      this.props.data.getIn(['animation', 'opacity']),
-        outline:      0,
-      }
       return <button style={style} onClick={this.startTest.bind(this)}>Start Test</button>
+    } else if (phase === "failure" && paragraph == paragraphs.length - 1) {
+      return <button style={style} onClick={this.experiment.bind(this)}>Experiment</button>
+    } else if (phase === "finish" && paragraph == paragraphs.length - 1) {
+      return <button style={style} onClick={this.finish.bind(this)}>Finish Section</button>
+    } else if (phase === "experiment") {
+      return <button style={{ ...style, opacity: 1.0 }} onClick={this.startTest.bind(this)}>Start Test</button>
     }
   }
 
   renderWidgets() {
     const square = this.props.data.get('square')
-    const phase  = this.props.data.get('phase')
-    if (phase < 3) {
+    const phase  = this.getPhase()
+
+    if (phase < 3 || phase === 'experiment') {
       return <SquareComp style_={{ margin: '20 auto 60' }} square={square} canActuate={true} onClick={this.handleClick.bind(this)}/>
-    } else if (phase == 3) {
+    } else if (phase == 'test') {
       const spacing = 20
       const size    = 80
 
@@ -242,14 +323,23 @@ export class LevelComponent extends Component {
     }
   }
 
+  // TODO
+  renderScore() {
+    const phase = this.getPhase()
+    const completed = (() => {
+      if (phase === '')
+    })()
+  }
+
   render() {
     const square = this.props.data.get('square')
 
     return (
       <div>
         {this.renderWidgets()}
+        {this.renderScore()}
         {this.renderParagraphs()}
-        {this.renderTest()}
+        {this.renderButtons()}
       </div>
     )
   }
@@ -259,8 +349,11 @@ LevelComponent.contextTypes = {
   store: React.PropTypes.object
 }
 
+const startSquare = Square.createSquare({ id: 0, colors: ['red', 'blue', 'green', 'yellow'], reaction: () => {} })
+
 export default I.fromJS({
   levelName: 'Tutorial00',
+  square:    startSquare,
   state: {
     phase:     0,
     square:    Square.createSquare({ id: 0, colors: ['red', 'blue', 'green', 'yellow'], reaction: () => {} }),
