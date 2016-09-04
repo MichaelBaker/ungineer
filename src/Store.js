@@ -5,28 +5,17 @@ import * as U          from './Utils'
 import * as Game       from './data/Game'
 import * as World      from './data/World'
 import * as Square     from './data/Square'
-import * as Prog       from './data/Progression'
 import * as Level      from './data/Level'
-import Tutorial00      from './levels/tutorial_00'
-import Tutorial01      from './levels/tutorial_01'
-import FinalLevel      from './levels/final_level'
+import Levels          from './Levels'
 
-const defaultState = Prog.createProgression({
-  progression: [
-    { level: Tutorial00 },
-    { level: Tutorial01 },
-    { level: FinalLevel },
-  ],
+const defaultState = I.fromJS({
+  level: Levels.Tutorial00.startState,
 })
 
 export const Action = {
-  UpdateLevelData: (data) => { return { type: 'UpdateLevelData', data: I.fromJS(data) } },
-  SetLevelData:    (data) => { return { type: 'SetLevelData',    data: I.fromJS(data) } },
-  // SelectSquare: ({squareId}) => { return { type: 'SelectSquare', squareId } },
-  // Progress: () => { return { type: 'Progress' } },
-  // Regress: () => { return { type: 'Regress' } },
-  // ToggleMode: () => { return { type: 'ToggleMode' } },
-  // Undo: () => { return { type: 'Undo' } },
+  UpdateLevelData: (data)      => { return { type: 'UpdateLevelData', data: I.fromJS(data) } },
+  SetLevelData:    (data)      => { return { type: 'SetLevelData',    data: I.fromJS(data) } },
+  StartLevel:      (levelName) => { return { type: 'StartLevel', levelName } },
 }
 
 export const makeStore = (startState) => {
@@ -37,6 +26,8 @@ export const makeStore = (startState) => {
         return state.updateIn(['level', 'state'], (state) => state.mergeDeep(action.data))
       } else if (action.type === 'SetLevelData') {
         return state.setIn(['level', 'state'], action.data)
+      } else if (action.type === 'StartLevel') {
+        return I.fromJS({ level: Levels[action.levelName].startState })
       } else {
         return state
       }

@@ -231,6 +231,7 @@ export class LevelComponent extends Component {
   }
 
   finish() {
+    this.context.dispatch(Action.StartLevel("Tutorial01"))
   }
 
   renderParagraph(p, i) {
@@ -373,7 +374,7 @@ LevelComponent.contextTypes = {
 
 const startSquare = Square.createSquare({ id: 0, colors: ['red', 'blue', 'green', 'yellow'], reaction: () => {} })
 
-export default I.fromJS({
+export let startState = I.fromJS({
   levelName: 'Tutorial00',
   square:    startSquare,
   state: {

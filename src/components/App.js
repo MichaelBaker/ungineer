@@ -11,13 +11,13 @@ export default class App extends Component {
 
   render() {
     const state      = this.props.state
-    const Level      = Levels[state.getIn(['level', 'levelName'])]
+    const Comp       = Levels[state.getIn(['level', 'levelName'])].component
     const levelState = state.getIn(['level', 'state'])
 
     return (
       <div style={appStyle}>
         <div style={titleStyle}>Ungineer</div>
-        <Level data={levelState} />
+        <Comp data={levelState} />
       </div>
     )
   }
