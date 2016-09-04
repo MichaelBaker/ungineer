@@ -47,12 +47,18 @@ const paragraphSets = {
   followUps: [
     "Nice. Can you do it nine more times in a row?",
   ],
+  finish: [
+    "It seems like you've got it.",
+    "There is only a 1 in 1,048,576 chance that you succeeded by guessing randomly.",
+    "If you identified the general pattern, but not the specific ordering involved, then you still only had a 1 in 24 chance of guessing correctly.",
+    "This is strong evidence that you really understand the basic rules that govern a single widget.",
+    "Now for something a bit more difficult and a lot more fun.",
+  ],
 }
 
 // TODO
 // * Add dispatch to the context
 // * Replace UpdateState with SetState
-// * Add Test
 
 const animations = {
   paragraph: (self, state, dispatch) => {
@@ -94,16 +100,41 @@ export class LevelComponent extends Component {
     const nextSquare    = Square.cycleColor(startSquare)
     const expectedColor = Square.currentColor(nextSquare)
     const selection     = Square.currentColor(square)
+    const phase         = this.getPhase()
+    const completed     = this.props.data.getIn(['score', 'completed'])
+    const total         = this.props.data.getIn(['score', 'total'])
 
-    if (expectedColor === selection) {
+    if (completed + 1 === total && completed !== undefined) {
+      this.context.store.dispatch(Action.UpdateLevel({
+        phase:  'finish',
+        square: nextSquare,
+        score: {
+          total:     undefined,
+          completed: undefined,
+        },
+        animation: {
+          opacity:    0.0,
+          paragraph:  0,
+          paragraphs: 'finish',
+        },
+      }))
+    } else if (expectedColor === selection && phase === 'test') {
       this.context.store.dispatch(Action.UpdateLevel({
         phase:  'followUps',
         square: nextSquare,
+        score: {
+          completed: completed + 1,
+        },
         animation: {
           opacity:    0.0,
           paragraph:  0,
           paragraphs: 'followUps',
         },
+      }))
+    } else if (expectedColor === selection && phase === 'followUps') {
+      this.context.store.dispatch(Action.UpdateLevel({
+        square: nextSquare,
+        score:  { completed: completed + 1 },
       }))
     } else {
       this.context.store.dispatch(Action.UpdateLevel({
@@ -193,6 +224,10 @@ export class LevelComponent extends Component {
     this.context.store.dispatch(Action.UpdateLevel({
       phase:  'test',
       square: square,
+      score:  {
+        completed: 0,
+        total:     10,
+      },
       animation: {
         paragraphs: 'test',
         opacity:    0,
@@ -205,6 +240,10 @@ export class LevelComponent extends Component {
     this.context.store.dispatch(Action.UpdateLevel({
       phase:  'experiment',
       square: startSquare,
+      score:  {
+        completed: undefined,
+        total:     undefined,
+      },
       animation: {
         opacity:    0.0,
         paragraph:  0,
@@ -274,61 +313,66 @@ export class LevelComponent extends Component {
     }
   }
 
+  renderTestWidgets() {
+    const square  = this.props.data.get('square')
+    const spacing = 20
+    const size    = 80
+
+    const divStyle = {
+      display:        'flex',
+      alignItems:     'center',
+      justifyContent: 'space-between',
+    }
+
+    const guessStyle = {
+      flex:          '0 0 auto',
+      display:       'flex',
+      flexDirection: 'column',
+    }
+
+    const squareStyle = {
+      flex:         '0 0 auto',
+      marginBottom: spacing,
+    }
+
+    const options = [
+      Square.createSquare({ id: 1, colors: ['red'],    reaction: () => {} }),
+      Square.createSquare({ id: 3, colors: ['green'],  reaction: () => {} }),
+      Square.createSquare({ id: 0, colors: ['yellow'], reaction: () => {} }),
+      Square.createSquare({ id: 2, colors: ['blue'],   reaction: () => {} }),
+    ]
+
+    const components = options.map((square) => {
+      return <SquareComp size={size} key={square.get('id')} style_={squareStyle} square={square} canActuate={true} onClick={this.handleGuess.bind(this)} />
+    })
+
+    return (
+      <div style={divStyle}>
+        <SquareComp style_={squareStyle} size={size} square={square} canActuate={false} />
+        <div style={guessStyle}>
+          {components}
+        </div>
+      </div>
+    )
+  }
+
   renderWidgets() {
     const square = this.props.data.get('square')
     const phase  = this.getPhase()
 
     if (phase < 3 || phase === 'experiment') {
       return <SquareComp style_={{ margin: '20 auto 60' }} square={square} canActuate={true} onClick={this.handleClick.bind(this)}/>
-    } else if (phase == 'test') {
-      const spacing = 20
-      const size    = 80
-
-      const divStyle = {
-        display:        'flex',
-        alignItems:     'center',
-        justifyContent: 'space-between',
-      }
-
-      const guessStyle = {
-        flex:          '0 0 auto',
-        display:       'flex',
-        flexDirection: 'column',
-      }
-
-      const squareStyle = {
-        flex:         '0 0 auto',
-        marginBottom: spacing,
-      }
-
-      const options = [
-        Square.createSquare({ id: 0, colors: ['yellow'], reaction: () => {} }),
-        Square.createSquare({ id: 1, colors: ['red'],    reaction: () => {} }),
-        Square.createSquare({ id: 2, colors: ['blue'],   reaction: () => {} }),
-        Square.createSquare({ id: 3, colors: ['green'],  reaction: () => {} }),
-      ]
-
-      const components = options.map((square) => {
-        return <SquareComp size={size} key={square.get('id')} style_={squareStyle} square={square} canActuate={true} onClick={this.handleGuess.bind(this)} />
-      })
-
-      return (
-        <div style={divStyle}>
-          <SquareComp style_={squareStyle} size={size} square={square} canActuate={false} />
-          <div style={guessStyle}>
-            {components}
-          </div>
-        </div>
-      )
+    } else if (phase === 'test' || phase === 'followUps') {
+      return this.renderTestWidgets()
     }
   }
 
-  // TODO
   renderScore() {
-    const phase = this.getPhase()
-    const completed = (() => {
-      if (phase === '')
-    })()
+    const completed = this.props.data.getIn(['score', 'completed'])
+    const total     = this.props.data.getIn(['score', 'total'])
+    if (completed !== undefined && total !== undefined) {
+      return <div>{completed}/{total}</div>
+    }
   }
 
   render() {
