@@ -6,7 +6,7 @@ import Levels             from '../Levels'
 
 export default class App extends Component {
   getChildContext() {
-    return { store: this.props.store }
+    return { dispatch: this.props.store.dispatch }
   }
 
   render() {
@@ -24,7 +24,7 @@ export default class App extends Component {
 }
 
 App.childContextTypes = {
-  store: React.PropTypes.object
+  dispatch: React.PropTypes.func
 }
 
 const appStyle = {

@@ -57,7 +57,6 @@ const paragraphSets = {
 }
 
 // TODO
-// * Add dispatch to the context
 // * Replace UpdateState with SetState
 
 const animations = {
@@ -92,7 +91,7 @@ export class LevelComponent extends Component {
 
   handleClick(square) {
     const newSquare = Square.cycleColor(square)
-    this.context.store.dispatch(Action.UpdateLevel({ square: newSquare }))
+    this.context.dispatch(Action.UpdateLevel({ square: newSquare }))
   }
 
   handleGuess(square) {
@@ -105,7 +104,7 @@ export class LevelComponent extends Component {
     const total         = this.props.data.getIn(['score', 'total'])
 
     if (completed + 1 === total && completed !== undefined) {
-      this.context.store.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevel({
         phase:  'finish',
         square: nextSquare,
         score: {
@@ -119,7 +118,7 @@ export class LevelComponent extends Component {
         },
       }))
     } else if (expectedColor === selection && phase === 'test') {
-      this.context.store.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevel({
         phase:  'followUps',
         square: nextSquare,
         score: {
@@ -132,14 +131,18 @@ export class LevelComponent extends Component {
         },
       }))
     } else if (expectedColor === selection && phase === 'followUps') {
-      this.context.store.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevel({
         square: nextSquare,
         score:  { completed: completed + 1 },
       }))
     } else {
-      this.context.store.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevel({
         phase:  'failure',
         square: startSquare,
+        score: {
+          total:     undefined,
+          completed: undefined,
+        },
         animation: {
           opacity:    0.0,
           paragraph:  0,
@@ -155,7 +158,7 @@ export class LevelComponent extends Component {
 
   startAnimation(animationName) {
     if (animationName) {
-      const animation = animations[animationName](this, this.props.data, this.context.store.dispatch)
+      const animation = animations[animationName](this, this.props.data, this.context.dispatch)
       this.setState({ animation: animation })
     }
   }
@@ -176,7 +179,7 @@ export class LevelComponent extends Component {
     const nextColor    = Square.currentColor(nextProps.data.get('square'))
 
     if (phase == 0 && currentColor !== 'yellow' && nextColor === 'yellow') {
-      this.context.store.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevel({
         phase:     1,
         animation: {
           paragraphs: 'second',
@@ -185,7 +188,7 @@ export class LevelComponent extends Component {
         },
       }))
     } else if (phase == 1 && currentColor !== 'blue' && nextColor === 'blue') {
-      this.context.store.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevel({
         phase:     2,
         animation: {
           paragraphs: 'third',
@@ -221,7 +224,7 @@ export class LevelComponent extends Component {
 
     _.times(cycles, () => { square = Square.cycleColor(square) })
 
-    this.context.store.dispatch(Action.UpdateLevel({
+    this.context.dispatch(Action.UpdateLevel({
       phase:  'test',
       square: square,
       score:  {
@@ -237,7 +240,7 @@ export class LevelComponent extends Component {
   }
 
   experiment() {
-    this.context.store.dispatch(Action.UpdateLevel({
+    this.context.dispatch(Action.UpdateLevel({
       phase:  'experiment',
       square: startSquare,
       score:  {
@@ -370,7 +373,7 @@ export class LevelComponent extends Component {
   renderScore() {
     const completed = this.props.data.getIn(['score', 'completed'])
     const total     = this.props.data.getIn(['score', 'total'])
-    if (completed !== undefined && total !== undefined) {
+    if (total) {
       return <div>{completed}/{total}</div>
     }
   }
@@ -390,7 +393,7 @@ export class LevelComponent extends Component {
 }
 
 LevelComponent.contextTypes = {
-  store: React.PropTypes.object
+  dispatch: React.PropTypes.func
 }
 
 const startSquare = Square.createSquare({ id: 0, colors: ['red', 'blue', 'green', 'yellow'], reaction: () => {} })
