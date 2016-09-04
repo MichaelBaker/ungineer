@@ -20,7 +20,8 @@ const defaultState = Prog.createProgression({
 })
 
 export const Action = {
-  UpdateLevel: (data) => { return { type: 'UpdateLevel', data: I.fromJS(data) } },
+  UpdateLevelData: (data) => { return { type: 'UpdateLevelData', data: I.fromJS(data) } },
+  SetLevelData:    (data) => { return { type: 'SetLevelData',    data: I.fromJS(data) } },
   // SelectSquare: ({squareId}) => { return { type: 'SelectSquare', squareId } },
   // Progress: () => { return { type: 'Progress' } },
   // Regress: () => { return { type: 'Regress' } },
@@ -32,8 +33,10 @@ export const makeStore = (startState) => {
   const initialState = startState || defaultState
   return createStore((state = initialState, action) => {
     const newState = (() => {
-      if (action.type === 'UpdateLevel') {
+      if (action.type === 'UpdateLevelData') {
         return state.updateIn(['level', 'state'], (state) => state.mergeDeep(action.data))
+      } else if (action.type === 'SetLevelData') {
+        return state.setIn(['level', 'state'], action.data)
       } else {
         return state
       }

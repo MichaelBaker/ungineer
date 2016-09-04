@@ -56,9 +56,6 @@ const paragraphSets = {
   ],
 }
 
-// TODO
-// * Replace UpdateState with SetState
-
 const animations = {
   paragraph: (self, state, dispatch) => {
     const startOpacity = state.getIn(['animation', 'opacity'])
@@ -70,16 +67,12 @@ const animations = {
       to:       { opacity: 1.0 },
       duration: 1000,
       easing:   'easeInQuad',
-      step:     ({opacity}) => dispatch(Action.UpdateLevel({ animation: { opacity } })),
+      step:     ({opacity}) => dispatch(Action.UpdateLevelData({ animation: { opacity } })),
       finish:   () => {
         const nextParagraph =  paragraph + 1
         if (nextParagraph < paragraphs.length) {
-          dispatch(Action.UpdateLevel({
-            animation: {
-              paragraph:  nextParagraph,
-              opacity:    0.0,
-              name:       'paragraph',
-            }
+          dispatch(Action.UpdateLevelData({
+            animation: { paragraph: nextParagraph, opacity: 0.0 }
           }))
         }
       },
@@ -91,7 +84,7 @@ export class LevelComponent extends Component {
 
   handleClick(square) {
     const newSquare = Square.cycleColor(square)
-    this.context.dispatch(Action.UpdateLevel({ square: newSquare }))
+    this.context.dispatch(Action.UpdateLevelData({ square: newSquare }))
   }
 
   handleGuess(square) {
@@ -104,13 +97,9 @@ export class LevelComponent extends Component {
     const total         = this.props.data.getIn(['score', 'total'])
 
     if (completed + 1 === total && completed !== undefined) {
-      this.context.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.SetLevelData({
         phase:  'finish',
         square: nextSquare,
-        score: {
-          total:     undefined,
-          completed: undefined,
-        },
         animation: {
           opacity:    0.0,
           paragraph:  0,
@@ -118,7 +107,7 @@ export class LevelComponent extends Component {
         },
       }))
     } else if (expectedColor === selection && phase === 'test') {
-      this.context.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevelData({
         phase:  'followUps',
         square: nextSquare,
         score: {
@@ -131,18 +120,14 @@ export class LevelComponent extends Component {
         },
       }))
     } else if (expectedColor === selection && phase === 'followUps') {
-      this.context.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevelData({
         square: nextSquare,
         score:  { completed: completed + 1 },
       }))
     } else {
-      this.context.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.SetLevelData({
         phase:  'failure',
         square: startSquare,
-        score: {
-          total:     undefined,
-          completed: undefined,
-        },
         animation: {
           opacity:    0.0,
           paragraph:  0,
@@ -156,15 +141,13 @@ export class LevelComponent extends Component {
     return this.props.data.get('phase')
   }
 
-  startAnimation(animationName) {
-    if (animationName) {
-      const animation = animations[animationName](this, this.props.data, this.context.dispatch)
-      this.setState({ animation: animation })
-    }
+  startAnimation() {
+    const animation = animations.paragraph(this, this.props.data, this.context.dispatch)
+    this.setState({ animation: animation })
   }
 
   componentDidMount() {
-    this.startAnimation(this.props.data.getIn(['animation', 'name']))
+    this.startAnimation()
   }
 
   componentWillUnmount() {
@@ -179,7 +162,7 @@ export class LevelComponent extends Component {
     const nextColor    = Square.currentColor(nextProps.data.get('square'))
 
     if (phase == 0 && currentColor !== 'yellow' && nextColor === 'yellow') {
-      this.context.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevelData({
         phase:     1,
         animation: {
           paragraphs: 'second',
@@ -188,7 +171,7 @@ export class LevelComponent extends Component {
         },
       }))
     } else if (phase == 1 && currentColor !== 'blue' && nextColor === 'blue') {
-      this.context.dispatch(Action.UpdateLevel({
+      this.context.dispatch(Action.UpdateLevelData({
         phase:     2,
         animation: {
           paragraphs: 'third',
@@ -204,15 +187,11 @@ export class LevelComponent extends Component {
     const newPhase         = this.getPhase()
     const oldParagraph     = prevProps.data.getIn(['animation', 'paragraph'])
     const newParagraph     = this.props.data.getIn(['animation', 'paragraph'])
-    const oldAnimationName = prevProps.data.getIn(['animation', 'name'])
-    const newAnimationName = this.props.data.getIn(['animation', 'name'])
 
     if (oldPhase !== newPhase) {
-      this.startAnimation(newAnimationName)
-    } else if (oldAnimationName !== newAnimationName) {
-      this.startAnimation(newAnimationName)
-    } else if (newAnimationName && oldParagraph !== newParagraph) {
-      this.startAnimation(newAnimationName)
+      this.startAnimation()
+    } else if (oldParagraph !== newParagraph) {
+      this.startAnimation()
     }
   }
 
@@ -224,7 +203,7 @@ export class LevelComponent extends Component {
 
     _.times(cycles, () => { square = Square.cycleColor(square) })
 
-    this.context.dispatch(Action.UpdateLevel({
+    this.context.dispatch(Action.SetLevelData({
       phase:  'test',
       square: square,
       score:  {
@@ -240,13 +219,9 @@ export class LevelComponent extends Component {
   }
 
   experiment() {
-    this.context.dispatch(Action.UpdateLevel({
+    this.context.dispatch(Action.SetLevelData({
       phase:  'experiment',
       square: startSquare,
-      score:  {
-        completed: undefined,
-        total:     undefined,
-      },
       animation: {
         opacity:    0.0,
         paragraph:  0,
@@ -406,7 +381,6 @@ export default I.fromJS({
     square:    Square.createSquare({ id: 0, colors: ['red', 'blue', 'green', 'yellow'], reaction: () => {} }),
     animation: {
       paragraphs: 'start',
-      name:       'paragraph',
       paragraph:  0,
       opacity:    0.0,
     },
